@@ -1,0 +1,312 @@
+worker_processes auto;
+events {
+worker_connections 1024;
+}
+
+# RTMP configuration
+rtmp {
+  server {
+    listen 1935; # Listen on standard RTMP port
+    chunk_size 4000;
+  # Define the Application
+    application show {
+      live on;
+      # Turn on HLS
+      hls on;
+      hls_path /mnt/hls/;
+      hls_fragment 3;
+      hls_playlist_length 60;
+      # disable consuming the stream from nginx as rtmp
+      deny play all;
+    }
+    application vod {
+      play /mnt/mp4s;
+    }
+    # RTMP Application
+    application stream {
+      live on;
+    }
+
+
+
+#--------------Start reflect-1------------------------------
+    application reflect-1 {
+      live on;
+      record off;
+      exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+        -c:v libx264 -g 60 -c:a aac -b:v 2000k -b:a 128k -vf scale=1280:-1 -preset ultrafast -crf 30 -f flv rtmp://loca$
+        -c:v libx264 -g 60 -c:a aac -b:v 500k -b:a 128k -vf scale=640:-1 -preset ultrafast -crf 30 -f flv rtmp://localh$
+        -c copy -f flv rtmp://localhost/reflect-1_full/$name
+        2>>/mnt/ramdisk/hls/ffmpeg_reflect-1.log;
+    }
+    application reflect-1_full {
+      live on;
+      record off;
+        exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+          -c copy -f flv rtmp://localhost/hls/$name_full
+;
+        push rtmp://a.rtmp.youtube.com/live2/kh5t-t4us-d1j2-55fj-3mvt;  #YOUTUBE NATE
+
+#      push rtmp://localhost:1935/hls/;
+
+    }
+    application reflect-1_640 {
+      live on;
+      record off;
+        exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+         -c copy -f flv rtmp://localhost/hls/$name_640
+;
+    }
+    application reflect-1_1280 {
+      live on;
+      record off;
+        exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+         -c copy -f flv rtmp://localhost/hls/$name_1280
+;
+    }
+
+
+#--------------End reflect-1------------------------------
+#      push rtmp://127.0.0.1:1936/rtmp/FB-10219308189442478-0-Abzftu441Ms9HBHj; #Nate FACEBOOK
+#      push rtmp://a.rtmp.youtube.com/live2/t5az-vrbq-3f68-ukdw-a49u;  #Nate YOUTUBE
+
+
+#--------------Start reflect-3------------------------------
+    application reflect-3 {
+      live on;
+      record off;
+      exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+        -c:v libx264 -g 30 -c:a aac -b:v 5000k -b:a 128k -vf scale=1280:-1 -preset ultrafast -crf 35 -f flv rtmp://loca$
+        -c:v libx264 -g 30 -c:a aac -b:v 500k -b:a 128k -vf scale=640:-1 -preset ultrafast -crf 35 -f flv rtmp://localh$
+        -c copy -f flv rtmp://localhost/reflect-3_full/$name
+        2>>/mnt/ramdisk/hls/ffmpeg_reflect-3.log;
+##      Place destination here
+
+        push rtmp://127.0.0.1:1936/rtmp/FB-511393780553955-0-Aby79cjsnBYiGCyd; #FACEBOOK Airshow (RTMPS)
+        push rtmp://a.rtmp.youtube.com/live2/7dk8-1qh3-84ct-6tah-5a3q;  #YOUTUBE AIRSHOW (RTMP)
+        push rtmp://a.rtmp.youtube.com/live2/pga8-4v54-pguc-hx5r-3bqu;  #YOUTUBE NAS (RTMP)
+
+
+#        push rtmp://54.165.127.120:1935/CarbonTV-LIVE-IN; #Carbon Airshow (RTMP)
+
+
+
+
+#       push rtmp://snocross-pri.origins.flosports.net/flocasts-in/live/snocross;
+
+#        push rtmp://127.0.0.1:1937/app/18ff5955-579d-cb4b-9e33-6ff615f423e3; #global-live.mux.com Airshow (RTMPS)
+
+
+
+
+#        push rtmp://127.0.0.1:1936/rtmp/FB-306714378311516-0-AbyqBzkucHKVQZUb; #FACEBOOK Airshow (RTMPS)
+#        push rtmp://127.0.0.1:1936/rtmp/FB-10228814336290208-0-AbxlN27DNWKwfd5o; #FACEBOOK Airshow (RTMPS)
+#        push rtmp://127.0.0.1:1936/rtmp/FB-306714378311516-0-AbyqBzkucHKVQZUb; #FACEBOOK Airshow (RTMPS)
+
+#        push rtmp://a.rtmp.youtube.com/live2/7dk8-1qh3-84ct-6tah-5a3q;  #YOUTUBE AIRSHOW (RTMP)
+#        push rtmp://127.0.0.1:1936/rtmp/FB-511393780553955-0-Aby79cjsnBYiGCyd; #FACEBOOK Airshow (RTMPS)
+#        push rtmp://a.rtmp.youtube.com/live2/t5az-vrbq-3f68-ukdw-a49u;  #YOUTUBE NATE
+
+    }
+    application reflect-3_full {
+      live on;
+      record off;
+        exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+          -c copy -f flv rtmp://localhost/hls/$name_full
+;
+##      Place destination here
+
+    }
+    application reflect-3_640 {
+      live on;
+      record off;
+        exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+          -c copy -f flv rtmp://localhost/hls/$name_640
+;
+##      Place destination here
+
+    }
+    application reflect-3_1280 {
+      live on;
+      record off;
+        exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+          -c copy -f flv rtmp://localhost/hls/$name_1280
+;
+##      Place destination here
+        push rtmp://live-ord.twitch.tv/app/live_547803330_EhoMlvd5QUbnbtJ4jO5BUw5fBN5ich;  #Nate TWITCH
+
+    }
+#--------------End reflect-3------------------------------
+
+
+#--------------Start reflect-rental-2------------------------------
+    application reflect-rental-2 {
+      live on;
+      record off;
+      exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+        -c:v libx264 -g 60 -c:a aac -b:v 750k -b:a 128k -vf scale=1280:-1 -preset ultrafast -crf 25 -f flv rtmp://local$
+        -c:v libx264 -g 60 -c:a aac -b:v 500k -b:a 128k -vf scale=640:-1 -preset ultrafast -crf 25 -f flv rtmp://localh$
+        -c copy -f flv rtmp://localhost/reflect-rental-2_full/$name
+        2>>/mnt/ramdisk/hls/ffmpeg_reflect-rental-2.log;
+    }
+    application reflect-rental-2_full {
+      live on;
+      record off;
+        exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+          -c copy -f flv rtmp://localhost/hls/$name_full;
+
+
+
+
+    }
+    application reflect-rental-2_640 {
+      live on;
+      record off;
+        exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+          -c copy -f flv rtmp://localhost/hls/$name_640;
+    }
+    application reflect-rental-2_1280 {
+      live on;
+      record off;
+        exec ffmpeg -i rtmp://localhost/$app/$name -async 1 -vsync -1
+          -c copy -f flv rtmp://localhost/hls/$name_1280;
+    }
+#--------------End reflect-rental-2------------------------------
+
+
+
+#      push rtmp://live-ord.twitch.tv/app/live_556616457_3dHQmKsgkgLG6ns8CeZY2nShbmZYgD;  #Nate TWITCH
+
+
+
+
+
+
+#--------------Start hls-1------------------------------
+
+
+        application hls-1 {
+                live on;
+                record off;
+#                 exec ffmpeg -threads 8 -i rtmp://localhost/$app/$name
+#                     -c:v libx264 -g 60 -c:a aac -b:v 128k -b:a 32k -vf scale=320:-1 -preset ultrafast -crf 30 -f flv $
+#                     -c:v libx264 -g 60 -c:a aac -b:v 300k -b:a 96k -vf scale=640:-1 -preset ultrafast -crf 30 -f flv $
+#                     -c:v libx264 -g 60 -c:a aac -b:v 600k -b:a 96k -vf scale=640:-1 -preset ultrafast -crf 30 -f flv $
+#                     -c:v libx264 -g 60 -c:a aac -b:v 1000k -b:a 96k -vf scale=960:-1 -preset ultrafast -crf 30 -f flv$
+#                     -c:v libx264 -g 60 -c:a aac -b:v 1300k -b:a 96k -vf scale=960:-1 -preset ultrafast -crf 30 -f flv$
+#                     -c:v libx264 -g 60 -c:a aac -b:v 1700k -b:a 128k -vf scale=1280:-1 -preset ultrafast -crf 30 -f f$
+                 exec ffmpeg -threads 8 -i rtmp://localhost/$app/$name
+#                     -c:v libx264 -g 60 -c:a aac -b:v 1800k -b:a 128k -vf scale=1280:-1 -preset ultrafast -crf 30 -f f$
+#                     -c:v libx264 -g 60 -c:a aac -b:v 1500k -b:a 128k -vf scale=1920:-1 -preset ultrafast -crf 30 -f f$
+#                     -c:v libx264 -g 60 -c:a aac -b:v 3000k -b:a 128k -vf scale=1920:-1 -preset ultrafast -crf 30 -f f$
+                     -c copy -f flv rtmp://localhost/hls/$name_full;
+#                     -c copy -f flv rtmp://localhost/reflect-1/dwncon 2>>/mnt/ramdisk/hls/ffmpeg-hls1_$name_2.log;
+        }
+
+        application hls {
+            live on;
+            hls on;
+            hls_type live;
+#            hls_path /srv/hls/;
+            hls_path /mnt/ramdisk/hls;
+#            hls_nested on;
+            hls_playlist_length 60s;
+            hls_fragment 2s;
+#            hls_variant _320 BANDWIDTH=170000;
+            hls_variant _640 BANDWIDTH=496000 RESOLUTION=640x480;
+#            hls_variant _640high BANDWIDTH=698000;
+#            hls_variant _960low BANDWIDTH=1300000 RESOLUTION=9605x540;
+#            hls_variant _960high BANDWIDTH=1430000;
+            hls_variant _1280 BANDWIDTH=1800000 RESOLUTION=1280x720;
+#            hls_variant _1280high BANDWIDTH=2360000 RESOLUTION=1280x720;
+#            hls_variant _1920low BANDWIDTH=3400000 RESOLUTION=1920x1080;
+#            hls_variant _1920high BANDWIDTH=3900000 RESOLUTION=1920x1080;
+            hls_variant _full BANDWIDTH=10000000  RESOLUTION=1920x1080;
+        }
+#------------END hls-1-------------
+
+
+
+
+
+
+  #-----END Server----
+  }
+#-----END RTMP----
+}
+
+#--------------HTTP SERVER--------------------------------
+http {
+  include mime.types;
+  include /etc/nginx/fastcgi.conf;
+  sendfile on;
+  tcp_nopush on;
+##  aio on;
+#  directio 512;
+  index index.html index.htm index.html index.php;
+#  default_type application/octet-stream;
+
+
+  server {
+    listen 80;
+    root /srv/www/hls1.natem.video/;
+    #location /var/www/2718.natem.video {
+    server_name hls1.natem.video;
+    location / {
+      # Disable cache
+      add_header 'Cache-Control' 'no-cache';
+      # CORS setup
+      add_header 'Access-Control-Allow-Origin' '*' always;
+      add_header 'Access-Control-Expose-Headers' 'Content-Length';
+      # allow CORS preflight requests
+      if ($request_method = 'OPTIONS') {
+        add_header 'Access-Control-Allow-Origin' '*';
+        add_header 'Access-Control-Max-Age' 1728000;
+        add_header 'Content-Type' 'text/plain charset=UTF-8';
+        add_header 'Content-Length' 0;
+        return 204;
+      } #END If
+#      types {
+##        application/dash+xml mpd;
+##        application/vnd.apple.mpegurl m3u8;
+##        video/mp2t ts;
+#        text/html html;
+#      } # END Types
+
+    } #END Location
+    location ~ \.php$ {
+      include /etc/nginx/fastcgi.conf;
+      include fastcgi_params;
+#      fastcgi_pass   127.0.0.1:1025;
+      fastcgi_pass   unix:/run/php-fpm/www.sock;
+#      fastcgi_pass   unix:/run/php/php7.2-fpm.sock;
+      fastcgi_param   SCRIPT_FILENAME    $document_root$fastcgi_script_name;
+      fastcgi_param   SCRIPT_NAME        $fastcgi_script_name;
+    } #END FASTCGI LOCATION
+
+    location /hls {
+      root /mnt/ramdisk;
+      directio_alignment 4k;
+      types {
+        application/dash+xml mpd;
+        application/vnd.apple.mpegurl m3u8;
+        video/mp2t ts;
+        add_header Cache-Control no-cache; # Prevent caching of HLS fragments
+        add_header Access-Control-Allow-Origin *; # Allow web player to access our playlist
+      }  #END Type
+    }  #END Listen
+  } #END Server
+
+
+
+#  server {
+#    listen       8080;
+##    server_name  domain1.com www.domain1.com;
+##    access_log   logs/domain1.access.log  main;
+#    root /var/www/2718.natem.video/;
+##    root         html;
+#
+#  }
+
+} #END HTTP
+
